@@ -5,7 +5,7 @@ import threading
 
 HOST = '10.62.206.35'
 PORT = 5000
-MASTER_UUID = f"MASTER-Enzio-{uuid.uuid4().hex[:4].upper()}"
+MASTER_UUID = f"MASTER-Rodrigo-{uuid.uuid4().hex[:4].upper()}"
 
 def handle_worker(conn, addr):
     """
