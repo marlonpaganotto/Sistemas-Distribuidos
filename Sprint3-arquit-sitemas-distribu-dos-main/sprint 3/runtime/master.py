@@ -535,13 +535,33 @@ def _get_local_ip() -> str:
 
 
 def main() -> None:
+    import os
+
+    env_name = os.environ.get("MASTER_NAME")
+    env_port = os.environ.get("MASTER_PORT")
+    env_bind = os.environ.get("MASTER_BIND_HOST")
+    env_host = os.environ.get("MASTER_HOST")
+    env_neighbor = os.environ.get("MASTER_NEIGHBOR")
+
     parser = argparse.ArgumentParser(description="Sprint 3 dual-role Master")
-    parser.add_argument("--id", required=True, dest="master_id")
-    parser.add_argument("--address", required=True)
+    parser.add_argument("--id", dest="master_id", default=env_name)
+    parser.add_argument("--address", default=None)
     parser.add_argument("--neighbor", action="append", default=[])
     args = parser.parse_args()
+
+    if args.master_id is None:
+        parser.error("--id ou MASTER_NAME e obrigatorio")
+
+    if args.address is None:
+        bind_host = env_bind or env_host or "0.0.0.0"
+        port = env_port or "10000"
+        args.address = f"{bind_host}:{port}"
+
+    if env_neighbor and env_neighbor not in args.neighbor:
+        args.neighbor.append(env_neighbor)
+
     _, port = parse_address(args.address)
-    local_ip = _get_local_ip()
+    local_ip = env_host or _get_local_ip()
     print(f"Master {args.master_id} iniciando...")
     print(f"  IP local:  {local_ip}")
     print(f"  Porta:     {port}")
