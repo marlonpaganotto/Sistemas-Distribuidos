@@ -189,10 +189,31 @@ class WorkerNode:
 
 
 def main() -> None:
+    import os
+    import sys
+
+    # Suporte a argumentos posicionais: python worker.py <host> <port> [worker_id]
+    positional = [a for a in sys.argv[1:] if not a.startswith("-")]
+    if len(positional) >= 2 and positional[0].replace(".", "").isdigit():
+        host, port = positional[0], positional[1]
+        worker_id = positional[2] if len(positional) >= 3 else f"worker-{host.split('.')[-1]}-{port}"
+        WorkerNode(worker_id, f"{host}:{port}").run_forever()
+        return
+
+    env_id = os.environ.get("WORKER_ID")
+    env_master = os.environ.get("WORKER_MASTER") or os.environ.get("MASTER_HOST")
+    env_port = os.environ.get("MASTER_PORT", "10000")
+
     parser = argparse.ArgumentParser(description="Sprint 3 resilient Worker")
-    parser.add_argument("--id", required=True, dest="worker_id")
-    parser.add_argument("--master", required=True, dest="master_address")
+    parser.add_argument("--id", dest="worker_id", default=env_id)
+    parser.add_argument("--master", dest="master_address", default=f"{env_master}:{env_port}" if env_master else None)
     args = parser.parse_args()
+
+    if args.worker_id is None:
+        parser.error("--id ou WORKER_ID e obrigatorio")
+    if args.master_address is None:
+        parser.error("--master ou WORKER_MASTER e obrigatorio")
+
     WorkerNode(args.worker_id, args.master_address).run_forever()
 
 
