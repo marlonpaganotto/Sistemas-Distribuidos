@@ -112,10 +112,12 @@ def parse_sprint3_message(data: Any) -> ParsedMessage:
 
 
 def _validate_request_help(payload: dict[str, Any]) -> None:
-    _require_fields(payload, ("master_id", "current_load", "capacity", "workers_needed"), "payload")
-    _require_str(payload, "master_id")
+    _require_fields(payload, ("current_load", "workers_needed"), "payload")
+    if "master_id" in payload:
+        _require_str(payload, "master_id")
+    if "capacity" in payload:
+        _require_int(payload, "capacity", 0, inclusive=False)
     _require_int(payload, "current_load", 0, inclusive=True)
-    _require_int(payload, "capacity", 0, inclusive=False)
     _require_int(payload, "workers_needed", 0, inclusive=False)
 
 
